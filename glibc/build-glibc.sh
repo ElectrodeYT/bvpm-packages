@@ -25,7 +25,7 @@ if [ ! -d "glibc-2.35/build" ]; then
 	rm -rf prefix 2> /dev/null; true
 	mkdir -p glibc-2.35/build prefix
 	(cd glibc-2.35/build; echo "rootsbindir=/usr/sbin" > configparms)
-	(cd glibc-2.35/build; ../configure --prefix=/usr --enable-kernel=3.2 libc_cv_slibdir=/lib)
+	(cd glibc-2.35/build; ../configure --prefix=/usr --enable-kernel=3.2 libc_cv_slibdir=/usr/lib)
 	(cd glibc-2.35/build; make -j$(nproc))
 	(cd glibc-2.35/build; make DESTDIR=$(pwd)/../../prefix install -j$(nproc))
 fi
