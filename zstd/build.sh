@@ -1,15 +1,20 @@
-# Generic ./configure script
+VERSION=1.5.2
+DOWNLOAD=https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-1.5.2.tar.gz
+FILE=zstd-1.5.2.tar.gz
+FOLDER=zstd-1.5.2
+NAME=zstd
+
 
 # Check if we want to clean the build dirs first
 function package_clean() {
 	echo $NAME: cleaning directories
-	rm -rf prefix package 2> /dev/null; true
+	rm -rf prefix package .fixed-stuff 2> /dev/null; true
 	rm -rf $FOLDER 2> /dev/null; true
 	rm -rf $FILE 2> /dev/null; true
 	rm -rf ../$NAME.bvp 2> /dev/null; true
 }
 
-# Download the package if we need to
+# Download bzip2 if we need to
 function download() {
   rm -rf $FILE 2> /dev/null; true
   wget $DOWNLOAD
@@ -20,21 +25,6 @@ function check_and_download() {
     if [ ! -d "$FOLDER" ]; then
       download
     fi
-}
-
-function build() {
-  if [ ! -d "$FOLDER/build" ]; then
-    rm -rf prefix 2> /dev/null; true
-    mkdir -p $FOLDER/build
-    if [ ! -z "$CONFIGURE_PRE" ]; then
-      ( $CONFIGURE_PRE )
-    fi
-    (cd $FOLDER/build; ../configure --prefix=/usr $CONFIGURE_ARGUMENTS)
-  fi
-  (cd $FOLDER/build; make -j$(nproc) $MAKE_ARGUMENTS)
-  rm -rf prefix
-  mkdir -p prefix
-  (cd $FOLDER/build; make DESTDIR=$(pwd)/../../prefix $INSTALL_ARGUMENTS install -j$(nproc))
 }
 
 function pack() {
@@ -59,4 +49,11 @@ function pack() {
   echo VERSION=$VERSION >> package/manifest
   echo "Create .bvp file with tar"
   (cd package; tar -cf ../../$NAME.bvp *)
+}
+
+function build() {
+    (cd $FOLDER; make -j$(nproc) prefix=$(pwd)/../prefix/usr)
+    rm -rf prefix
+    mkdir -p prefix
+    (cd $FOLDER; make prefix=$(pwd)/../prefix/usr install -j$(nproc))
 }

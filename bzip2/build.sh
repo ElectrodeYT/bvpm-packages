@@ -1,15 +1,20 @@
-# Generic ./configure script
+VERSION=1.0.8
+DOWNLOAD=https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
+FILE=bzip2-1.0.8.tar.gz
+FOLDER=bzip2-1.0.8
+NAME=bzip2
+
 
 # Check if we want to clean the build dirs first
 function package_clean() {
 	echo $NAME: cleaning directories
-	rm -rf prefix package 2> /dev/null; true
+	rm -rf prefix package .fixed-stuff 2> /dev/null; true
 	rm -rf $FOLDER 2> /dev/null; true
 	rm -rf $FILE 2> /dev/null; true
 	rm -rf ../$NAME.bvp 2> /dev/null; true
 }
 
-# Download the package if we need to
+# Download bzip2 if we need to
 function download() {
   rm -rf $FILE 2> /dev/null; true
   wget $DOWNLOAD
@@ -20,21 +25,6 @@ function check_and_download() {
     if [ ! -d "$FOLDER" ]; then
       download
     fi
-}
-
-function build() {
-  if [ ! -d "$FOLDER/build" ]; then
-    rm -rf prefix 2> /dev/null; true
-    mkdir -p $FOLDER/build
-    if [ ! -z "$CONFIGURE_PRE" ]; then
-      ( $CONFIGURE_PRE )
-    fi
-    (cd $FOLDER/build; ../configure --prefix=/usr $CONFIGURE_ARGUMENTS)
-  fi
-  (cd $FOLDER/build; make -j$(nproc) $MAKE_ARGUMENTS)
-  rm -rf prefix
-  mkdir -p prefix
-  (cd $FOLDER/build; make DESTDIR=$(pwd)/../../prefix $INSTALL_ARGUMENTS install -j$(nproc))
 }
 
 function pack() {
@@ -59,4 +49,22 @@ function pack() {
   echo VERSION=$VERSION >> package/manifest
   echo "Create .bvp file with tar"
   (cd package; tar -cf ../../$NAME.bvp *)
+}
+
+function build() {
+    if [ ! -f ".fixed-stuff" ]; then
+      rm -rf prefix 2> /dev/null; true
+      (cd $FOLDER; sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile)
+      (cd $FOLDER; sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile)
+      echo doing weird bz2 stuff
+      (cd $FOLDER; make -f Makefile-libbz2_so)
+      (cd $FOLDER; make clean)
+      touch ".fixed-stuff"
+    fi
+    (cd $FOLDER; make -j$(nproc))
+    rm -rf prefix
+    mkdir -p prefix
+    (cd $FOLDER; make PREFIX=$(pwd)/../prefix/usr install -j$(nproc))
+    (cd $FOLDER; cp -av libbz2.so.* $(pwd)/../prefix/usr/lib)
+    (cd $FOLDER; ln -sv libbz2.so.1.0.8 $(pwd)/../prefix/usr/lib/libbz2.so)
 }
