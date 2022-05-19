@@ -3,8 +3,6 @@ DOWNLOAD=https://www.sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz
 FILE=bzip2-1.0.8.tar.gz
 FOLDER=bzip2-1.0.8
 NAME=bzip2
-
-
 # Check if we want to clean the build dirs first
 function package_clean() {
 	echo $NAME: cleaning directories
@@ -13,20 +11,17 @@ function package_clean() {
 	rm -rf $FILE 2> /dev/null; true
 	rm -rf ../$NAME.bvp 2> /dev/null; true
 }
-
 # Download bzip2 if we need to
 function download() {
   rm -rf $FILE 2> /dev/null; true
   wget $DOWNLOAD
   tar xf $FILE
 }
-
 function check_and_download() {
     if [ ! -d "$FOLDER" ]; then
       download
     fi
 }
-
 function pack() {
   # Check if we even have the valid source files
   # prefix should only be created after the make install, so if it doesnt exist,
@@ -50,7 +45,6 @@ function pack() {
   echo "Create .bvp file with tar"
   (cd package; tar -cf ../../$NAME.bvp *)
 }
-
 function build() {
     if [ ! -f ".fixed-stuff" ]; then
       rm -rf prefix 2> /dev/null; true
@@ -68,3 +62,4 @@ function build() {
     (cd $FOLDER; cp -av libbz2.so.* $(pwd)/../prefix/usr/lib)
     (cd $FOLDER; ln -sv libbz2.so.1.0.8 $(pwd)/../prefix/usr/lib/libbz2.so)
 }
+DEPENDENCY=glibc

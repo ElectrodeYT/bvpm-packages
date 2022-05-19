@@ -45,6 +45,9 @@ function pack() {
     echo $NAME: build not called yet!
     return
   fi
+  if [ $(type -t setup_prefix) == function ]; then
+    setup_prefix
+  fi
   # The usr/share/info/dir file is a bit weird;
   # TL;DR: in about 99% of cases if we have it we want to yeet it
   rm -rf prefix/usr/share/info/dir 2> /dev/null; true
