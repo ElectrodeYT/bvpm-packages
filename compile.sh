@@ -35,7 +35,7 @@ if [[ "$PACKAGE" == "pack-all" ]]; then
   echo "packing all packages"
   for package in */; do
     REALPACKNAME=$(echo "$package" | sed 's/\///g')
-    ./$0 $REALPACKNAME clean
+    ./$0 $REALPACKNAME pack
   done
   exit
 fi

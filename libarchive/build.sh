@@ -8,11 +8,12 @@ NAME=libarchive
 
 CONFIGURE_PRE=""
 CONFIGURE_ARGUMENTS=""
+DEPENDENCY=glibc,zlib,libmd,bzip2,acl,attr
 
 source configure-script.sh
 
 function build() {
-  (cd $FOLDER; ./configure --prefix=/usr $CONFIGURE_ARGUMENTS)
+  (cd $FOLDER; ./configure --prefix=/usr --without-expat --without-xml2 --without-lz4 --without-libb2 --without-libb2 --without-openssl --without-neetle $CONFIGURE_ARGUMENTS)
   (cd $FOLDER; make -j$(nproc) $MAKE_ARGUMENTS)
   rm -rf prefix
   mkdir -p prefix

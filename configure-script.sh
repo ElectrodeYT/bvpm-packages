@@ -45,6 +45,9 @@ function pack() {
     echo $NAME: build not called yet!
     return
   fi
+  # The usr/share/info/dir file is a bit weird;
+  # TL;DR: in about 99% of cases if we have it we want to yeet it
+  rm -rf prefix/usr/share/info/dir 2> /dev/null; true
   echo "Generating owned-files"
   rm -rf package 2> /dev/null; true
   mkdir -p package
@@ -57,6 +60,9 @@ function pack() {
   rm -rf package/manifest 2> /dev/null; true
   echo PACKAGE=$NAME > package/manifest
   echo VERSION=$VERSION >> package/manifest
+  if [ ! -z "$DEPENDENCY" ]; then
+    echo DEPENDENCY=$DEPENDENCY >> package/manifest
+  fi
   echo "Create .bvp file with tar"
   (cd package; tar -cf ../../$NAME.bvp *)
 }
